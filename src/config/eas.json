@@ -1,0 +1,35 @@
+{
+  "cli": {
+    "version": ">= 16.3.0",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal"
+    },
+    "preview": {
+      "android": {
+        "buildType": "apk"
+      },
+      "distribution": "internal",
+      "env": {
+        "MYHRT_BLOCK_INTERNET": "1"
+      }
+    },
+    "production": {
+      "android": {
+        "buildType": "app-bundle",
+        "autoIncrement": true
+      },
+      "credentialsSource": "remote",
+      "env": {
+        "APP_ENV": "production",
+        "MYHRT_BLOCK_INTERNET": "1"
+      }
+    }
+  },
+  "submit": {
+    "production": {}
+  }
+}

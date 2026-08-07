@@ -1,0 +1,29 @@
+{
+  "name": "myhrt-security",
+  "version": "1.0.0",
+  "description": "The at-rest encryption and secure-storage layer of the MyHRT app, published so anyone can read and verify how MyHRT protects health data on the device.",
+  "license": "Apache-2.0",
+  "homepage": "https://myhrt.health",
+  "private": false,
+  "scripts": {
+    "test": "jest"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.24.0",
+    "@babel/preset-env": "^7.24.0",
+    "@babel/preset-typescript": "^7.24.0",
+    "@noble/ciphers": "^2.2.0",
+    "babel-jest": "^29.7.0",
+    "jest": "^29.7.0"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "moduleNameMapper": {
+      "^react-native-quick-crypto$": "<rootDir>/__mocks__/react-native-quick-crypto.js",
+      "^expo-crypto$": "<rootDir>/__mocks__/expo-crypto.js"
+    },
+    "transformIgnorePatterns": [
+      "/node_modules/(?!@noble/)"
+    ]
+  }
+}
