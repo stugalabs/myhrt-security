@@ -41,7 +41,7 @@ a real audit.
 | Casual snooping on an unlocked phone | Partly | The optional app lock (§6) is a barrier, not a cryptographic wall. |
 | Someone who knows your device passcode | Partly | The app lock adds friction, but a short PIN is not brute-force proof (§6). |
 | Malware or a rooted device, phone unlocked | **No** | An attacker running with your privileges can read keys in memory and data in the clear. Encryption at rest protects data on disk, not against code running as you. |
-| Live instrumentation (e.g. Frida) or forensic extraction (e.g. Cellebrite) on an unlocked, rooted device | **No, out of scope** | Same reason as the row above: code running as you sees the key in memory and the plaintext while the app is open, and can dump the app's heap. This is not something a React Native app can defend against. If your threat model includes a determined actor with a rooted device in hand, this is not the right tool, and we would rather say so than pretend otherwise. |
+| Live instrumentation (e.g. Frida) or forensic extraction (e.g. Cellebrite) on an unlocked, rooted device | **No, out of scope** | Same reason as the row above: code running as you sees the key in memory and the plaintext while the app is open, and can dump the app's heap. This is not something a React Native app can defend against. If your threat model includes a determined actor with a rooted device in hand, this is not the right tool. |
 | Data you exported or shared, after it leaves the app | **No, out of scope** | Exports are yours to place wherever you choose (§7). |
 
 ## 2. What we claim, and what we don't
@@ -89,7 +89,7 @@ Privacy scan.
 **The bundled Firebase code.** `expo-notifications`, the library MyHRT uses for
 reminders, bundles Firebase Cloud Messaging on Android whether or not an app uses
 push. Its Kotlin names the `FirebaseMessaging` class at build time, so that class
-and roughly 45 others around it stay in the package unless the library is forked.
+and nearly forty others around it stay in the package unless the library is forked.
 MyHRT only uses local, on-device scheduling: there is no `google-services.json` in
 the project and no push-token registration anywhere in the code, so nothing ever
 connects. The bundled FCM code would otherwise add `INTERNET`,
@@ -104,8 +104,9 @@ layer to drop it entirely is on the roadmap; the permission-level guarantee abov
 does not depend on that.
 
 React Native's own networking and image stack bundles OkHttp, an HTTP client, for
-the same structural reason. The app makes no network calls, so R8 shrinks it to a
-stray class, and with no INTERNET permission it too has nothing to open.
+the same structural reason. The app makes no network calls, so R8 strips its networking classes out and
+leaves only OkHttp's `PublicSuffixDatabase` helper, and with no INTERNET
+permission it too has nothing to open.
 
 **The strongest single check** is to run a release build behind a deny-all
 firewall or packet capture (PCAPdroid, NetGuard, mitmproxy) and confirm nothing
@@ -116,6 +117,16 @@ WebView anywhere.
 **One caveat, stated plainly:** a debug build carries INTERNET, because the
 development server delivers the app's code over the local network. Check a release
 build, which is what you install.
+
+**The one exported provider.** Decompiling the manifest shows a single exported
+content provider, `expo.modules.clipboard.ClipboardFileProvider`
+(`android:exported="true"`). It ships with `expo-clipboard`, the module MyHRT
+uses to copy your recovery code, and the library requires it to be exported; the
+app fails to launch otherwise. MyHRT only ever puts text on the clipboard, never
+a file or image, so nothing is written to the paths this provider would serve,
+and it is never exercised. The app's own file-sharing providers,
+`FileSystemFileProvider` and `SharingFileProvider`, are not exported. It is named
+here so that finding the exported flag comes with its reason attached.
 
 ## 4. Encryption at rest
 

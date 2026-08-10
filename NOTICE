@@ -1,7 +1,10 @@
 MyHRT security layer
-Copyright 2026 Stuga Labs (MyHRT)
+Copyright 2026 Stuga Labs. All rights reserved.
 
-This product includes software developed by Stuga Labs for the MyHRT
-application (https://myhrt.health).
+This repository contains security-critical source code from the MyHRT
+application (https://myhrt.health), published for inspection and independent
+verification under the MyHRT Source Verification License. See the LICENSE file.
 
-Licensed under the Apache License, Version 2.0. See the LICENSE file.
+The "MyHRT" and "Stuga Labs" names and the MyHRT logo are not licensed for use in
+other applications. "MyHRT" is a trademark of Stuga Labs (registration pending);
+"Stuga Labs" is a registered company name; the logo is protected by copyright.

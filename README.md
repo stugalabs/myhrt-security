@@ -93,7 +93,7 @@ these files. You can read every line and run the tests yourself.
 
 **What it does *not* prove:** that this exact source is what got compiled into
 the app on your phone. Publishing source can never prove that by itself; that's
-the inherent "source ≠ binary" gap, and we're not going to pretend otherwise.
+the inherent "source ≠ binary" gap.
 
 **The stronger, binary-level proof**: the one that doesn't require trusting that
 the source matches the build, is a property of the shipped app itself:
@@ -116,13 +116,15 @@ the source matches the build, is a property of the shipped app itself:
 - **No analytics, ad, or crash-reporting SDK.** Two bundled leftovers a decompiler
   will still surface. `expo-notifications`, the library behind reminders, brings
   Firebase Cloud Messaging with it; its Kotlin names the `FirebaseMessaging` class
-  outright, so that class and roughly 45 others around it can't leave the build
+  outright, so that class and the nearly forty other Firebase classes around it can't leave the build
   unless the library is forked. The app never uses push: nothing is configured for
   it, there's no Firebase project, and no code asks for a token. Firebase's entry
   points are cut from the release manifest, the messaging service, the init
   provider, the `c2dm` receiver, so nothing can start it. The second is OkHttp, an
   HTTP client React Native pulls in for its own networking and image loading; the
-  app makes no network calls, so R8 shrinks it to a single leftover class. Neither
+  app makes no network calls, so R8 strips its networking classes out and leaves
+  only OkHttp's `PublicSuffixDatabase` helper (one class plus a synthetic inner
+  class). Neither
   can act, for the reason in the bullet above: with no internet permission the
   process has no network socket to open. A later release removes Firebase with the
   notification rewrite. An εxodus scan currently reports zero trackers on the
@@ -164,9 +166,12 @@ protected) can be inspected by anyone.
 
 ## License
 
-[Apache License 2.0](LICENSE). You're free to read, use, and build on this code;
-please keep the attribution. The MyHRT name and logo are trademarks and are not
-licensed for use on other apps.
+Source-available under the [MyHRT Source Verification License](LICENSE). You may
+read this code, run its tests, fork it to inspect, and diff it against the shipped
+app, so you can verify MyHRT's security claims for yourself. It is not open-source
+software: it is not licensed for reuse in other apps, and rights beyond that
+verification are reserved. The MyHRT and Stuga Labs names and the MyHRT logo are not licensed for use in
+other apps.
 
 ## Security
 
