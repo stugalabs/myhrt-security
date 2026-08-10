@@ -44,8 +44,9 @@ permissions base.apk` does the same job. No `INTERNET` line appears.
 
 ## 4. Exodus Privacy
 
-Look up `health.myhrt` at reports.exodus-privacy.eu.org, or submit the APK to
-Exodus yourself. Exodus is a static scanner: it reads the compiled bytecode and
+The current report is at
+[reports.exodus-privacy.eu.org/en/reports/health.myhrt/latest](https://reports.exodus-privacy.eu.org/en/reports/health.myhrt/latest/),
+or you can submit the APK to Exodus yourself. Exodus is a static scanner: it reads the compiled bytecode and
 lists known SDK signatures it finds, whether or not the app uses them. The report
 shows the app's permissions (no internet permission) and its tracker count. That
 count is currently zero, because Exodus matches analytics and advertising SDK
@@ -54,6 +55,16 @@ code: the notification library bundles Firebase Cloud Messaging, which a decompi
 will find (see the Firebase note in ARCHITECTURE.md). Exodus measures what its
 signatures match, not everything bundled and not what runs. The traffic capture in
 the next section is the behavioural check.
+
+Two lines in that report can look surprising, and are worth naming. The permission
+list includes `com.android.vending.CHECK_LICENSE`. Google Play injects that during
+distribution; it is not in the app's uploaded bundle (build the APK locally from
+the AAB and it does not appear), it grants no network access, and the app still
+holds no `INTERNET` permission. Exodus may also show the signing certificate as
+absent or non-conforming: the app is signed through Google Play App Signing with
+the v2/v3 APK signature scheme, and Exodus's parser reads only the legacy v1 JAR
+signature, so it reports none. The signature is verifiable with `apksigner verify
+--print-certs` or on the Play Console App Signing page.
 
 ## 5. The strongest check: watch the traffic
 
