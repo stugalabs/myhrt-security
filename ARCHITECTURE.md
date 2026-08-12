@@ -118,15 +118,28 @@ WebView anywhere.
 development server delivers the app's code over the local network. Check a release
 build, which is what you install.
 
-**The one exported provider.** Decompiling the manifest shows a single exported
-content provider, `expo.modules.clipboard.ClipboardFileProvider`
-(`android:exported="true"`). It ships with `expo-clipboard`, the module MyHRT
-uses to copy your recovery code, and the library requires it to be exported; the
-app fails to launch otherwise. MyHRT only ever puts text on the clipboard, never
-a file or image, so nothing is written to the paths this provider would serve,
-and it is never exercised. The app's own file-sharing providers,
-`FileSystemFileProvider` and `SharingFileProvider`, are not exported. It is named
-here so that finding the exported flag comes with its reason attached.
+**The two exported providers.** Decompiling the manifest shows two exported
+content providers, and each has a specific reason.
+
+`expo.modules.clipboard.ClipboardFileProvider` ships with `expo-clipboard`, the
+module MyHRT uses to copy your recovery code, and the library requires it to be
+exported (the app fails to launch otherwise). MyHRT only ever puts text on the
+clipboard, never a file or image, so nothing is written to the paths this
+provider would serve, and it is never exercised.
+
+`com.reactnativeandroidwidget.RNWidgetImageProvider` serves the home-screen
+widget's rendered image. An Android widget is drawn by the launcher, a separate
+app, which must be able to read that image, so this provider is exported by
+design. That is inherent to how every Android home-screen widget works, not
+specific to MyHRT. The image can show medication names, so the app's "Hide names
+on widget" setting replaces them with a neutral label for anyone who wants the
+widget kept legible only to themselves on a shared or observed home screen. (An
+earlier build tried to lock this provider down; that silently broke widget
+rendering on some launchers, so exported is the working, standard configuration.)
+
+The app's own file-sharing providers, `FileSystemFileProvider` and
+`SharingFileProvider`, are not exported. These are named here so that finding an
+exported flag comes with its reason attached.
 
 ## 4. Encryption at rest
 
