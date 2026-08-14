@@ -19,6 +19,13 @@ the phone go to **Settings → Apps → MyHRT → Permissions**. There is no "fu
 network access" or internet permission listed. This list is read from the app's
 manifest, so it reflects what the app can actually do, not a self-declaration.
 
+You will see one network-related entry: **"view network connections"**
+(`ACCESS_NETWORK_STATE`). That is not internet access. Android's WorkManager,
+which runs the widgets and keeps reminders reliable, requires it, and it only
+lets an app read whether a network exists, never open one. The permission that
+would actually reach the network, `INTERNET`, is the one that is absent, and that
+is what the checks below confirm.
+
 ## 2. With adb, against the installed app
 
 Connect the phone to a computer with USB debugging enabled, then run:

@@ -86,6 +86,14 @@ the `preview` and `production` profiles in [`src/config/eas.json`](src/config/ea
 actually installed, using the Play permission list, `adb`, `aapt`, or an Exodus
 Privacy scan.
 
+**One network-related permission is present, and it is not INTERNET.** The
+manifest declares `ACCESS_NETWORK_STATE`, shown as "view network connections" in
+the Play and Android permission lists. Android's WorkManager requires it, and the
+home-screen widgets and the background reminder scheduler both run on WorkManager.
+It only lets an app check whether a network currently exists. It cannot open a
+connection or send anything. INTERNET is still absent, so the guarantee above is
+unchanged: this permission reads a status flag, it does not grant access.
+
 **The bundled Firebase code.** `expo-notifications`, the library MyHRT uses for
 reminders, bundles Firebase Cloud Messaging on Android whether or not an app uses
 push. Its Kotlin names the `FirebaseMessaging` class at build time, so that class
