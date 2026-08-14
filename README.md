@@ -1,8 +1,8 @@
 # MyHRT Security Layer
 
 The at-rest encryption and secure-storage code from the [MyHRT](https://myhrt.health)
-app, published so anyone can read and verify how MyHRT protects health data on
-your device.
+app, published so anyone can read how MyHRT protects health data on your device,
+and verify on the installed app that it cannot send that data anywhere.
 
 MyHRT is a private hormone-replacement-therapy tracker. All data stays on your
 device: no accounts, no servers, no tracking. This repository contains the
@@ -36,6 +36,8 @@ the short version.
 | `src/config/app.config.js` | The build hook that strips `android.permission.INTERNET` from release builds |
 | `src/config/eas.json` | Build profiles showing `MYHRT_BLOCK_INTERNET=1` set for `preview` and `production` |
 | `src/config/withManifestHardening.js` | The build plugin that, on release builds, adds `tools:node="remove"` markers for the Firebase and transitive datatransport manifest entry points (messaging and component-discovery services, init provider, instance-id/`c2dm` receiver, transport schedulers), plus defensive markers for ML Kit / code-scanner left over from a since-removed dev dependency. It removes manifest entry points, not the compiled DEX classes. |
+| `src/config/withBackupRules.js` | The build plugin that excludes every data domain from Android cloud backup and device-to-device transfer (the Android 12+ "Copy my data" flow), overwriting expo-secure-store's permissive defaults, so no app data leaves the device by either backup path |
+| `src/config/withWidgetProviderSecurity.js` | The build plugin that makes the home-screen widget's image provider non-exported (readable only by the launcher, through a temporary per-image grant), so other apps cannot read rendered widget images, which can contain medication names |
 | `test/aesGcm.test.ts` | Proves the encryption round-trips, cross-checks native vs web, and rejects tampering and wrong keys |
 
 > **A note on `appAuth.ts` and `localBackup.ts`:** these two reference the app's

@@ -43,6 +43,7 @@ a real audit.
 | Malware or a rooted device, phone unlocked | **No** | An attacker running with your privileges can read keys in memory and data in the clear. Encryption at rest protects data on disk, not against code running as you. |
 | Live instrumentation (e.g. Frida) or forensic extraction (e.g. Cellebrite) on an unlocked, rooted device | **No, out of scope** | Same reason as the row above: code running as you sees the key in memory and the plaintext while the app is open, and can dump the app's heap. This is not something a React Native app can defend against. If your threat model includes a determined actor with a rooted device in hand, this is not the right tool. |
 | Data you exported or shared, after it leaves the app | **No, out of scope** | Exports are yours to place wherever you choose (§7). |
+| Someone seeing the app itself on your device | **No** | The encryption protects what you record, not the fact that MyHRT is installed. The app name and icon show in the launcher and app list, and the package name (`health.myhrt`) is visible in Settings and to any app allowed to list installed packages. The privacy settings reduce what appears on a locked or shared screen (generic notification text, hidden widget names, screenshot blocking), but the app cannot currently disguise its own presence. |
 
 ## 2. What we claim, and what we don't
 
