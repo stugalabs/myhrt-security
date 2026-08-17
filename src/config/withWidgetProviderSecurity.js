@@ -1,10 +1,10 @@
-// Expo config plugin — forces react-native-android-widget's RNWidgetImageProvider
+// Expo config plugin: forces react-native-android-widget's RNWidgetImageProvider
 // to be NON-exported and permission-gated (SEC-002).
 //
 // This provider serves rendered widget images, which contain medication names,
 // so it must not be readable by other apps on the device. react-native-android-
 // widget declares it in its OWN library AndroidManifest, which Gradle merges into
-// the app manifest LATE — after all config plugins have run. At prebuild time the
+// the app manifest LATE, after all config plugins have run. At prebuild time the
 // provider is therefore NOT yet present in the manifest object, so an in-place
 // `findIndex(...).exported = 'false'` silently does nothing. Verified on a real
 // build: the provider shipped android:exported="true" with no permission,
@@ -43,7 +43,7 @@ module.exports = (config) => {
       // the launcher with no way in, and the widget shows "can't load widget"
       // (Permission Denial opening RNWidgetImageProvider from com.miui.home /
       // com.sec... observed on-device, 2026-08-12). Do NOT add
-      // android:permission="BIND_APPWIDGET" here — that is for the widget RECEIVER,
+      // android:permission="BIND_APPWIDGET" here, that is for the widget RECEIVER,
       // not this image provider, and it blocks the launcher's read. Net effect:
       // other apps still cannot read the images (not exported, no blanket grant),
       // but the launcher can, so widgets render AND stay private.

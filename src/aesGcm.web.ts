@@ -1,10 +1,10 @@
 // SCOPE: Web is a DEVELOPMENT-ONLY target, not a supported security surface. No
 // web build is published, and the security guarantees documented in ARCHITECTURE.md
-// (Platform scope) apply to the NATIVE Android build only — browser storage is not
+// (Platform scope) apply to the NATIVE Android build only, browser storage is not
 // hardware-backed and has a different threat model. Do not treat this file as
 // inheriting the Android at-rest guarantees.
 //
-// Web — AES-256-GCM via @noble/ciphers (pure JS). This is the original
+// Web: AES-256-GCM via @noble/ciphers (pure JS). This is the original
 // implementation that native used too until 2026-07-07; on web there is no
 // react-native-quick-crypto native module, browser JS engines JIT the pure-JS
 // path acceptably, and web datasets go through the single-blob storage layer

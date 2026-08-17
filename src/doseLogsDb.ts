@@ -1,28 +1,28 @@
-// Native (Android / iOS) — dose_logs storage backed by expo-sqlite instead of
+// Native (Android / iOS): dose_logs storage backed by expo-sqlite instead of
 // expo-secure-store's SharedPreferences-on-Android backend.
 //
 // Why: SharedPreferences (what expo-secure-store uses on Android) loads its entire
 // backing file into memory on every access and rewrites it whole on every commit.
 // Android's own guidance is to never use it for data that grows large. Splitting
 // dose_logs into year-partitions (the previous approach) only split the *logical
-// keys* — on Android those keys can still live inside the same physical preferences
+// keys*, on Android those keys can still live inside the same physical preferences
 // file, so a multi-year retroactive backfill kept getting slower as that file grew,
 // freezing the UI thread and occasionally crashing on lower-end devices.
 //
 // SQLite is built for exactly this: datasets that grow over years, with proper
 // per-row transactional writes instead of whole-file rewrites. Each row's full
-// content is still encrypted (AES-256-GCM) before it touches disk — the only
+// content is still encrypted (AES-256-GCM) before it touches disk, the only
 // plaintext column is `id`, a random opaque token carrying no health information,
 // kept in the clear purely so it can be a primary key for point lookups/updates.
 // The encryption key itself is generated once and stored in expo-secure-store
-// (Android Keystore / iOS Keychain) — a single small fixed-size value, exactly
+// (Android Keystore / iOS Keychain), a single small fixed-size value, exactly
 // what SecureStore is good at. This keeps the privacy policy's encryption claim
 // accurate: the key lives in the device's secure key store (hardware-backed
 // where the device supports it), and only ciphertext ever lands in SQLite.
 import * as SQLite from "expo-sqlite";
 import * as Crypto from "expo-crypto";
 // Metro resolves aesGcm.ts (react-native-quick-crypto, hardware AES) on native
-// and aesGcm.web.ts (@noble pure-JS) on web — same wire format either way.
+// and aesGcm.web.ts (@noble pure-JS) on web, same wire format either way.
 import { encryptGcm, decryptGcm } from "./aesGcm";
 import SecureStorage from "./secureStorage";
 import type { DoseLog } from "./doseLogTypes";
@@ -63,7 +63,7 @@ function _getKey(): Promise<Uint8Array> {
 /**
  * Exposes the same device-bound AES-256 key used for dose_logs encryption, for
  * reuse by utils/localBackup.ts. Deliberately the same key rather than a second
- * one — both protect equivalent-sensitivity data on the same device, and one
+ * one, both protect equivalent-sensitivity data on the same device, and one
  * fewer secret in Keystore/Keychain is one fewer thing that can go missing.
  */
 export function getDoseLogsEncryptionKey(): Promise<Uint8Array> {
@@ -90,7 +90,7 @@ function _getDb(): Promise<SQLite.SQLiteDatabase> {
       // secure_delete=FAST zeros freed pages when SQLite is already rewriting them,
       // so deleted ciphertext and opaque ids aren't left carveable in the db file or
       // its WAL. Measured negligible on a Samsung A41 (a 9.8k-row delete ran in ~0.5s
-      // with it on, once the delete was batched — see dbDeleteDoseLogsForMedication),
+      // with it on, once the delete was batched, see dbDeleteDoseLogsForMedication),
       // so it's kept as free defense-in-depth.
       await db.execAsync("PRAGMA secure_delete = FAST;");
       await db.execAsync(
@@ -112,14 +112,14 @@ function _rowToLog(key: Uint8Array, payload: string): DoseLog | null {
 
 // ==================== SERIALIZATION ====================
 //
-// expo-sqlite's single connection does not support overlapping transactions —
+// expo-sqlite's single connection does not support overlapping transactions,
 // calling withTransactionAsync while another is still in flight on the same
 // connection throws "cannot start a transaction within a transaction". Multiple
 // independent call sites write dose logs (medication-setup's retroactive backfill,
 // Home's auto-miss backfill, log-dose, edit modal, ...) and nothing guarantees
 // they run sequentially relative to each other. Every exported function in this
 // module is routed through this single in-process queue so calls always run one
-// at a time regardless of caller discipline — mirrors utils/storage.ts's
+// at a time regardless of caller discipline, mirrors utils/storage.ts's
 // withLogLock, but scoped here so it's impossible to forget at a call site.
 let _dbQueue: Promise<unknown> = Promise.resolve();
 function _withDbLock<T>(fn: () => Promise<T>): Promise<T> {
@@ -138,11 +138,11 @@ function _yieldToEventLoop(): Promise<void> {
 // ==================== IN-MEMORY CACHE ====================
 //
 // Every field except `id` is encrypted, so there's no plaintext column to filter
-// or window a query by — any read of "the logs" must decrypt every row. Without
+// or window a query by, any read of "the logs" must decrypt every row. Without
 // caching, Home re-pays that full-table decrypt cost on every focus/foreground,
 // which gets slower the longer someone uses the app (or after a large retroactive
 // backfill). This cache decrypts the whole table once per app session and keeps
-// itself in sync on every write below — never written to disk, so it doesn't
+// itself in sync on every write below, never written to disk, so it doesn't
 // change what's encrypted at rest, only how often the same ciphertext gets
 // decrypted in memory during one running session. Cleared on cold start.
 let _cache: Map<string, DoseLog> | null = null;
@@ -150,7 +150,7 @@ let _cache: Map<string, DoseLog> | null = null;
 /**
  * Clears the module-level encryption key cache so the next call to _getKey()
  * fetches (or generates) a fresh key from SecureStore. Must be called from
- * clearAllData() after the old key is deleted — without this, a user who
+ * clearAllData() after the old key is deleted, without this, a user who
  * re-onboards in the same session would encrypt new dose rows with the deleted
  * key, causing silent decryption failures on the next cold start.
  */
@@ -160,7 +160,7 @@ export function resetDoseLogsKeyCache(): void {
 
 /** Test-only: this module is loaded once per test file, so the cache otherwise
  * leaks state between test cases. Call from beforeEach alongside resetting the
- * mock SQLite store. No-op effect in production — nothing calls this there. */
+ * mock SQLite store. No-op effect in production, nothing calls this there. */
 export function __resetDoseLogsCacheForTests(): void {
   _cache = null;
 }
@@ -172,10 +172,10 @@ function _cacheGetAll(): DoseLog[] {
 // ==================== PUBLIC API ====================
 
 // Rows decrypted per tick before yielding to the event loop. The first
-// dbGetAllDoseLogs() call each app session decrypts the entire table — for a
+// dbGetAllDoseLogs() call each app session decrypts the entire table, for a
 // multi-year history that's thousands of pure-JS AES-GCM operations. This call
 // happens at cold start (refreshWidgets in _layout.tsx's startup sequence), the
-// exact moment the app-lock screen is shown — an unyielded loop here blocks the
+// exact moment the app-lock screen is shown, an unyielded loop here blocks the
 // JS thread long enough to delay PIN verification or the device-auth trigger.
 const DECRYPT_YIELD_EVERY_N_ROWS = 200;
 
@@ -197,12 +197,12 @@ export async function dbGetAllDoseLogs(): Promise<DoseLog[]> {
 }
 
 // Rows packed into one multi-row INSERT per native call. A prepared statement
-// reused per-row still costs one JS<->native bridge round-trip per row — at tens
+// reused per-row still costs one JS<->native bridge round-trip per row, at tens
 // of thousands of rows (a multi-decade backfill) that overhead alone is minutes,
 // regardless of how the SQL itself is compiled. Packing many rows into a single
 // "INSERT ... VALUES (?,?),(?,?),..." statement cuts the round-trip count by this
 // factor. 100 rows (200 bound params) matches published SQLite bulk-insert
-// benchmarks showing diminishing/negative returns past ~100 rows per statement —
+// benchmarks showing diminishing/negative returns past ~100 rows per statement,
 // comfortably under SQLite's bound-parameter limit either way (999 on older
 // builds, 32766 on current ones).
 const ROWS_PER_INSERT_STATEMENT = 100;
@@ -258,7 +258,7 @@ function _logsEqual(a: DoseLog, b: DoseLog): boolean {
  * Semantically replaces the full dataset, but diffs against the current state
  * and only touches rows that actually changed. hooks/useDoseLogger.ts calls this
  * with "the full allLogs array, mutated by one entry" for every single toggle/
- * edit/delete action on Home — without diffing, every tap would unconditionally
+ * edit/delete action on Home, without diffing, every tap would unconditionally
  * delete and re-insert the entire multi-year table.
  */
 export async function dbReplaceAllDoseLogs(logs: DoseLog[]): Promise<void> {
@@ -294,17 +294,17 @@ export async function dbReplaceAllDoseLogs(logs: DoseLog[]): Promise<void> {
     // Circuit breaker: dbReplaceAllDoseLogs is meant for small, targeted edits
     // (moving/editing a handful of logs) or one-time schema migrations that
     // preserve every existing id. It should never legitimately delete a majority
-    // of existing rows — a caller passing a stale or incomplete array (e.g. a
+    // of existing rows, a caller passing a stale or incomplete array (e.g. a
     // read that raced with a huge concurrent backfill) would otherwise silently
     // wipe real history. Genuine full wipes must go through dbDeleteAllDoseLogs()
     // instead, which is explicit and only reachable from "Clear all data".
     //
-    // The absolute floor is on toDeleteIds.length, not previous.size — every
+    // The absolute floor is on toDeleteIds.length, not previous.size, every
     // legitimate call site here only ever touches a handful of logs for one
     // medication on one day (at most a few multi-dose slots), never double
     // digits in one call. A previous version gated this on previous.size > 50,
-    // which meant any account with 50 or fewer total dose logs — exactly a
-    // freshly-tested account — had zero protection from this breaker at all,
+    // which meant any account with 50 or fewer total dose logs, exactly a
+    // freshly-tested account, had zero protection from this breaker at all,
     // regardless of what percentage a stale-array call would wipe.
     if (toDeleteIds.length >= 10 && toDeleteIds.length / previous.size > 0.5) {
       throw new Error(

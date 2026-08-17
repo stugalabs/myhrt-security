@@ -5,7 +5,7 @@ import { pbkdf2Async } from '@noble/hashes/pbkdf2.js';
 import { sha256 } from '@noble/hashes/sha2.js';
 import { storageGet, storageSet } from '../../utils/storage';
 
-// ── Lock config keys — now routed to EncryptedStorage (registered in
+// ── Lock config keys, now routed to EncryptedStorage (registered in
 // SECURE_KEYS) so they cannot be tampered with by editing a plain AsyncStorage
 // file on a rooted device (e.g. flipping app_lock_enabled to "false" to skip
 // the lock without knowing the PIN). readLockConfig() self-heals values left
@@ -109,10 +109,10 @@ export async function saveLockoutState(failCount: number, lockoutUntil: number |
 // Legacy format (no c field): treated as 100_000 iterations (original value).
 // Legacy format: raw digit string (migrated transparently on first successful login)
 
-// 10k iterations — defense-in-depth on top of hardware-backed EncryptedStorage.
+// 10k iterations, defense-in-depth on top of hardware-backed EncryptedStorage.
 // Full 100k is not justified when Android Keystore / iOS Keychain is the primary boundary.
 const PIN_ITERATIONS = 10_000;
-// Recovery code is a 20-char string from a 32-char alphabet (~10^30 possible values) —
+// Recovery code is a 20-char string from a 32-char alphabet (~10^30 possible values),
 // orders of magnitude more entropy than a 6-digit PIN (~10^6). At that keyspace, heavy
 // KDF stretching adds negligible real brute-force resistance, but costs the same JS-thread
 // CPU time as the PIN hash. Lower iterations here cuts perceived setup delay roughly in
@@ -172,7 +172,7 @@ export async function verifyPin(input: string): Promise<boolean> {
     }
   } catch { /* fall through to legacy check */ }
 
-  // Legacy: plaintext PIN — verify, then transparently migrate to hashed format
+  // Legacy: plaintext PIN, verify, then transparently migrate to hashed format
   if (stored === input) {
     await savePin(input).catch(() => {});
     return true;
@@ -182,7 +182,7 @@ export async function verifyPin(input: string): Promise<boolean> {
 
 // ── Recovery code ──────────────────────────────────────────────────────────
 // Format: XXXXX-XXXXX-XXXXX-XXXXX (20 alphanum chars in 4 groups of 5)
-// Stored as PBKDF2-SHA256 hash (same scheme as PIN) — plaintext never at rest.
+// Stored as PBKDF2-SHA256 hash (same scheme as PIN), plaintext never at rest.
 const CHARSET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // no I/O/1/0 to avoid confusion
 
 function _normaliseCode(code: string): string {
@@ -219,7 +219,7 @@ export async function verifyRecoveryCode(input: string): Promise<boolean> {
       return diff === 0;
     }
   } catch { /* fall through to legacy */ }
-  // Legacy: plaintext code — verify then transparently migrate to hashed format
+  // Legacy: plaintext code, verify then transparently migrate to hashed format
   if (_normaliseCode(stored) === _normaliseCode(input)) {
     const salt = new Uint8Array(16);
     Crypto.getRandomValues(salt);

@@ -7,7 +7,7 @@
 // app.json already relies on to strip READ_EXTERNAL_STORAGE, SYSTEM_ALERT_WINDOW,
 // etc.). The result: the shipped APK declares NO internet permission at all,
 // so the operating system itself forbids the app from opening any network
-// connection. This is a hardening/trust signal for a local-only health app —
+// connection. This is a hardening/trust signal for a local-only health app,
 // its absence is visible on the Play Store listing and in an exodus-privacy
 // scan without anyone installing the app.
 //

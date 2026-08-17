@@ -1,12 +1,12 @@
-// Native (Android / iOS) — AES-256-GCM via react-native-quick-crypto (C++/JSI,
+// Native (Android / iOS): AES-256-GCM via react-native-quick-crypto (C++/JSI,
 // hardware-accelerated through OpenSSL). Replaces the previous pure-JS @noble
 // implementation for dose logs and local backups: @noble is correct but runs
 // interpreted under Hermes, and at multi-decade history scale (tens of thousands
 // of per-row operations) that measured 20-40+ seconds of frozen UI on a low-end
 // device (Samsung A41) for a cold-start full-table decrypt, ~30 s for a backfill
-// write, and a saturated JS thread — tester-reported 2026-07-06/07.
+// write, and a saturated JS thread, tester-reported 2026-07-06/07.
 //
-// WIRE-COMPATIBLE with the @noble format — this is a hard requirement, existing
+// WIRE-COMPATIBLE with the @noble format, this is a hard requirement, existing
 // installs must keep decrypting their data:
 //   stored string = base64(nonce[12]) + "." + base64(ciphertext || authTag[16])
 // @noble's gcm(key, nonce).encrypt() returns ciphertext||tag in one buffer;
@@ -14,7 +14,7 @@
 // on encrypt and split the last 16 bytes on decrypt. Covered by a cross-
 // implementation round-trip test in __tests__/aesGcm.test.ts.
 //
-// Nonces still come from expo-crypto's getRandomValues — NOT globalThis.crypto
+// Nonces still come from expo-crypto's getRandomValues, NOT globalThis.crypto
 // (crashes on some MediaTek devices, e.g. Samsung A41) and not quick-crypto's
 // RNG, purely to keep the proven RNG path unchanged.
 //

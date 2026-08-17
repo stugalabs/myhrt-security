@@ -1,4 +1,4 @@
-// Expo config plugin — overwrites expo-secure-store's default backup rule XMLs
+// Expo config plugin: overwrites expo-secure-store's default backup rule XMLs
 // with versions that exclude all domains from both cloud-backup and device-transfer.
 //
 // Why this exists: expo-secure-store's bundled defaults include all SharedPreferences
@@ -12,7 +12,7 @@ const path = require('path');
 const fs = require('fs');
 
 const BACKUP_RULES_XML = `<?xml version="1.0" encoding="utf-8"?>
-<!-- Auto Backup rules for Android 11 and lower — exclude everything -->
+<!-- Auto Backup rules for Android 11 and lower: exclude everything -->
 <full-backup-content>
   <exclude domain="root" path="."/>
   <exclude domain="file" path="."/>
@@ -23,7 +23,7 @@ const BACKUP_RULES_XML = `<?xml version="1.0" encoding="utf-8"?>
 `;
 
 const DATA_EXTRACTION_RULES_XML = `<?xml version="1.0" encoding="utf-8"?>
-<!-- Auto Backup rules for Android 12+ — exclude everything from cloud and device-transfer -->
+<!-- Auto Backup rules for Android 12+: exclude everything from cloud and device-transfer -->
 <data-extraction-rules>
   <cloud-backup>
     <exclude domain="root" path="."/>

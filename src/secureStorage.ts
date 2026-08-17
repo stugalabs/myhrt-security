@@ -1,7 +1,7 @@
-// Native (Android / iOS) — uses Android Keystore / iOS Keychain via expo-secure-store.
+// Native (Android / iOS): uses Android Keystore / iOS Keychain via expo-secure-store.
 //
 // expo-secure-store itself enforces a 2048-byte (UTF-8) limit per value on BOTH
-// platforms — see byteCountOverLimit() in its source. Above that it logs a
+// platforms, see byteCountOverLimit() in its source. Above that it logs a
 // warning today and is documented to throw in a future SDK version. This is a
 // constraint of the JS wrapper, not of the native storage backend, so it applies
 // uniformly on Android and iOS regardless of either platform's real capacity.
@@ -78,7 +78,7 @@ async function getItem(key: string): Promise<string | null> {
 }
 
 async function setItem(key: string, val: string): Promise<void> {
-  // Clean up previous chunks if any — bounded concurrency, same reasoning as below.
+  // Clean up previous chunks if any, bounded concurrency, same reasoning as below.
   const prevMeta = await SecureStore.getItemAsync(key + CHUNK_META);
   if (prevMeta) {
     const prevN = parseInt(prevMeta, 10);
@@ -98,7 +98,7 @@ async function setItem(key: string, val: string): Promise<void> {
   // Remove the plain key so reads don't return stale data
   await SecureStore.deleteItemAsync(key);
 
-  // Chunks are independent writes — bounded concurrency avoids flooding the native
+  // Chunks are independent writes, bounded concurrency avoids flooding the native
   // bridge with potentially hundreds of simultaneous calls for a very large value.
   // The count key is written last, after every chunk has actually landed, so a
   // reader never sees a meta count pointing at chunks that don't exist yet.
@@ -127,15 +127,15 @@ async function removeItem(key: string): Promise<void> {
 
 // ==================== GLOBAL SERIALIZATION ====================
 // All SecureStore operations run strictly one-at-a-time through this queue.
-// Rationale: on a Samsung A41 (Android 11), concurrent SecureStore reads —
+// Rationale: on a Samsung A41 (Android 11), concurrent SecureStore reads,
 // e.g. Home's first load racing the startup backup snapshot's ~17 reads after
-// the splash screen stopped serializing them — intermittently NEVER RESOLVED
+// the splash screen stopped serializing them, intermittently NEVER RESOLVED
 // (Keystore-level hang; JS thread confirmed idle via a heartbeat probe while
 // loadData sat awaiting a read forever, 2026-07-07). Samsung keymaster HALs
 // are known to misbehave under concurrent operations. Individual ops are
 // single-digit milliseconds, so serializing costs nothing measurable, and the
 // per-op chunk fan-out (mapWithConcurrency above) still parallelises WITHIN
-// one logical operation — the queue wraps whole getItem/setItem/removeItem
+// one logical operation, the queue wraps whole getItem/setItem/removeItem
 // calls, not individual chunk reads.
 //
 // A failed op must not wedge the queue: the chain continues via .then(fn, fn).

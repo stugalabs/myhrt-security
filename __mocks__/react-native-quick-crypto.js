@@ -1,4 +1,4 @@
-// Jest mock — react-native-quick-crypto implements Node's crypto API on top of
+// Jest mock: react-native-quick-crypto implements Node's crypto API on top of
 // native OpenSSL, so in tests we substitute Node's own crypto: identical
 // createCipheriv/createDecipheriv/getAuthTag/setAuthTag semantics. This means
 // test/aesGcm.test.ts exercises the REAL src/aesGcm.ts code path (the

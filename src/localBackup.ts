@@ -1,15 +1,15 @@
-// Automatic local backup of all health data — a last-resort safety net in case
+// Automatic local backup of all health data, a last-resort safety net in case
 // a future bug (anywhere in the app) causes data loss, independent of any
 // specific storage layer. Runs at most once per calendar day, fire-and-forget,
 // and must never throw or block app startup. Restore is a separate, explicit,
-// user-confirmed action — never triggered automatically.
+// user-confirmed action, never triggered automatically.
 //
 // Snapshot reuses loadAllUserData() (also used by the manual JSON export) so
 // it stays in sync with whatever data domains the app tracks, rather than
 // duplicating a second "everything" list that could drift out of date.
 //
 // Encrypted with the same device-bound AES-256-GCM key already used for
-// dose_logs (utils/doseLogsDb.ts) — no user password, since this backup is
+// dose_logs (utils/doseLogsDb.ts), no user password, since this backup is
 // automatic and silent. The key never leaves SecureStore (Android Keystore /
 // iOS Keychain); only ciphertext touches disk, in the app's private document
 // directory. android:allowBackup="false" already excludes the whole app from
@@ -17,7 +17,7 @@
 import * as FileSystem from "expo-file-system/legacy";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 // Metro resolves aesGcm.ts (react-native-quick-crypto, hardware AES) on native
-// and aesGcm.web.ts (@noble pure-JS) on web — same wire format either way, and
+// and aesGcm.web.ts (@noble pure-JS) on web, same wire format either way, and
 // the same format previously produced inline here, so old backups stay readable.
 import { encryptGcm, decryptGcm } from "./aesGcm";
 import { getDoseLogsEncryptionKey, dbDeleteAllDoseLogs } from "./doseLogsDb";
@@ -49,7 +49,7 @@ const BACKUP_FORMAT_VERSION = 1;
 // Opt-in: disabled by default. The user turns this on explicitly in Settings,
 // which keeps it coherent with the manual cloud backup (also an explicit
 // choice) and avoids putting extra copies of health data on disk without the
-// user asking for them. Plain AsyncStorage — this is a UI preference, not
+// user asking for them. Plain AsyncStorage, this is a UI preference, not
 // sensitive health data itself.
 
 /** Defaults to false (disabled): local backups are opt-in, turned on explicitly in Settings. */
@@ -69,7 +69,7 @@ export async function setLocalBackupEnabled(enabled: boolean): Promise<void> {
 // One-time offer to turn backups on, surfaced on Home once the user has data
 // worth protecting (see app/(tabs)/home.tsx). "Seen" is stored whether they
 // accept or decline, so the offer never shows twice. On read error, treat as
-// seen — better to skip the offer than to nag on every launch.
+// seen, better to skip the offer than to nag on every launch.
 const BACKUP_OFFER_SEEN_KEY = "local_backup_offer_seen";
 
 export async function hasSeenBackupOffer(): Promise<boolean> {
@@ -85,7 +85,7 @@ export async function markBackupOfferSeen(): Promise<void> {
 }
 
 // ==================== ENCRYPTION (shared with doseLogsDb.ts) ====================
-// Delegated to utils/aesGcm — same key, same wire format as before.
+// Delegated to utils/aesGcm, same key, same wire format as before.
 
 const _encrypt = encryptGcm;
 const _decrypt = decryptGcm;
@@ -125,10 +125,10 @@ export async function listLocalBackups(): Promise<LocalBackupInfo[]> {
 /**
  * Deletes every local backup file. Must be called alongside "Clear all data"
  * (utils/storage.ts's clearAllData(), which this file deliberately does not
- * import — it already imports several save* functions FROM storage.ts, so the
+ * import, it already imports several save* functions FROM storage.ts, so the
  * reverse import would be a require cycle, same reasoning as the reminder-
  * cancellation comment in settings.tsx's doClearData). clearAllData() deletes
- * dose_logs_db_key, the same key backups are encrypted with — any backup made
+ * dose_logs_db_key, the same key backups are encrypted with, any backup made
  * before that point becomes permanently undecryptable garbage the moment the
  * key is gone, so leaving the files behind serves no purpose and just shows
  * the user backups that will always fail to restore. Safe to call even if no
@@ -144,7 +144,7 @@ export async function deleteAllLocalBackups(): Promise<void> {
 
 /**
  * Runs the daily backup if one hasn't already run today. Fire-and-forget from
- * _layout.tsx — must never throw and must never block startup.
+ * _layout.tsx, must never throw and must never block startup.
  */
 export async function runDailyLocalBackupIfNeeded(): Promise<void> {
   try {
@@ -186,7 +186,7 @@ async function _loadBackupFile(filename: string): Promise<{ formatVersion: numbe
   return JSON.parse(decrypted) as { formatVersion: number; createdAt: string; data: DomainData };
 }
 
-// Same five categories/labels as EXPORT_CATEGORIES in components/ExportOptionsModal.tsx —
+// Same five categories/labels as EXPORT_CATEGORIES in components/ExportOptionsModal.tsx,
 // keep both in sync if a new data domain is ever added to either.
 export type BackupCategoryCounts = {
   medications: number;
@@ -199,7 +199,7 @@ export type BackupCategoryCounts = {
 
 /**
  * Decrypts a backup just far enough to report what's in it, without restoring
- * anything — used to show category counts in the restore confirmation dialog
+ * anything, used to show category counts in the restore confirmation dialog
  * before the user commits to an irreversible overwrite.
  */
 export async function peekLocalBackup(filename: string): Promise<{ createdAt: string; counts: BackupCategoryCounts }> {
@@ -223,8 +223,8 @@ export async function peekLocalBackup(filename: string): Promise<{ createdAt: st
  * currently stored. This is destructive and must only be called after explicit
  * user confirmation (e.g. a Settings button with a confirmation dialog).
  *
- * Dose logs go through dbDeleteAllDoseLogs() + appendDoseLogs() — an explicit
- * clear-then-insert — rather than the SQLite "replace all" path, since that
+ * Dose logs go through dbDeleteAllDoseLogs() + appendDoseLogs(), an explicit
+ * clear-then-insert, rather than the SQLite "replace all" path, since that
  * path's circuit breaker (see doseLogsDb.ts) is designed to refuse exactly
  * this kind of full-history overwrite when it isn't clearly intentional.
  */
