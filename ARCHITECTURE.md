@@ -200,8 +200,8 @@ Storage routing lives in the app's central `storage.ts` (part of the closed
 application, not reproduced here, but its behaviour is described below):
 
 - **Encrypted:** all health data (medications, diary and symptom logs, blood
-  tests, metrics, the change log, profile, HRT type, reminder settings) and the
-  preferences that reveal what a user tracks. Most of this goes through
+  tests, bleeding logs, metrics, the change log, profile, HRT type, reminder
+  settings) and the preferences that reveal what a user tracks. Most of this goes through
   `expo-secure-store`, which on Android encrypts values with AES-GCM under a
   Keystore key; the high-volume dose logs use the app's own AES-256-GCM layer over
   SQLite described in §4.

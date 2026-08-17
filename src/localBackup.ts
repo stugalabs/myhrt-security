@@ -28,6 +28,7 @@ import {
   saveMedications,
   saveSymptomLogs,
   saveBloodTestLogs,
+  saveBleedingLogs,
   saveReminderSettings,
   saveUnitPreferences,
   saveCustomTrackingItems,
@@ -193,6 +194,7 @@ export type BackupCategoryCounts = {
   diary: number;
   bloodTests: number;
   bodyMetrics: number;
+  bleeding: number;
 };
 
 /**
@@ -211,6 +213,7 @@ export async function peekLocalBackup(filename: string): Promise<{ createdAt: st
       diary: data.diaryLogs.length,
       bloodTests: data.bloodTests.length,
       bodyMetrics: data.weightLogs.length + data.measurements.length,
+      bleeding: (data.bleeding ?? []).length,
     },
   };
 }
@@ -236,6 +239,7 @@ export async function restoreFromLocalBackup(filename: string): Promise<{ doseLo
     saveMedications(data.medications),
     saveSymptomLogs(data.diaryLogs),
     saveBloodTestLogs(data.bloodTests),
+    saveBleedingLogs(data.bleeding ?? []),
     data.reminderSettings ? saveReminderSettings(data.reminderSettings) : Promise.resolve(),
     data.unitPreferences ? saveUnitPreferences(data.unitPreferences) : Promise.resolve(),
     saveCustomTrackingItems(data.customTrackingItems),
