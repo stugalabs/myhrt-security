@@ -36,6 +36,9 @@ import {
   saveInjectionSitePreferences,
   saveUserProfile,
   setHRTType,
+  setBleedingColor,
+  setCalendarStyle,
+  setAdherenceChartStyle,
   storageSet,
 } from "./storage";
 
@@ -235,6 +238,10 @@ export async function restoreFromLocalBackup(filename: string): Promise<{ doseLo
   await dbDeleteAllDoseLogs();
   await appendDoseLogs(data.doseLogs);
 
+  // Cosmetic view preferences. Guarded and validated because an older backup
+  // predates this field (undefined at runtime), same pattern as data.bleeding.
+  const dp = data.displayPreferences;
+
   await Promise.all([
     saveMedications(data.medications),
     saveSymptomLogs(data.diaryLogs),
@@ -253,6 +260,12 @@ export async function restoreFromLocalBackup(filename: string): Promise<{ doseLo
     storageSet("added_blood_markers", JSON.stringify(data.addedBloodMarkers)),
     storageSet("measurement_custom_fields", JSON.stringify(data.measurementCustomFields)),
     storageSet("blood_test_reference_ranges", JSON.stringify(data.bloodTestReferenceRanges)),
+    dp?.bleedingColor === "rose" || dp?.bleedingColor === "blue" || dp?.bleedingColor === "purple"
+      ? setBleedingColor(dp.bleedingColor) : Promise.resolve(),
+    dp?.calendarStyle === "dots" || dp?.calendarStyle === "solid" || dp?.calendarStyle === "rings"
+      ? setCalendarStyle(dp.calendarStyle) : Promise.resolve(),
+    dp?.adherenceChartStyle === "dots" || dp?.adherenceChartStyle === "line"
+      ? setAdherenceChartStyle(dp.adherenceChartStyle) : Promise.resolve(),
   ]);
 
   return { doseLogCount: data.doseLogs.length };

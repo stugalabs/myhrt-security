@@ -138,13 +138,18 @@ provider would serve, and it is never exercised.
 
 `com.reactnativeandroidwidget.RNWidgetImageProvider` serves the home-screen
 widget's rendered image. An Android widget is drawn by the launcher, a separate
-app, which must be able to read that image, so this provider is exported by
-design. That is inherent to how every Android home-screen widget works, not
-specific to MyHRT. The image can show medication names, so the app's "Hide names
-on widget" setting replaces them with a neutral label for anyone who wants the
-widget kept legible only to themselves on a shared or observed home screen. (An
-earlier build tried to lock this provider down; that silently broke widget
-rendering on some launchers, so exported is the working, standard configuration.)
+app, so the library declares this provider exported, which is how every Android
+home-screen widget works, not something specific to MyHRT. Be precise about what
+exported means here: not only the launcher, but any app installed on the device
+can query this provider and read the currently rendered widget image. That image
+can show medication names and doses, so the real control is in the app's
+widget-privacy settings: "Hide names on widget" replaces them with a neutral
+label, and the widget can also hide the delivery method and the dose count. With
+those on, the rendered image carries nothing sensitive, whoever reads it. An
+earlier build added a config plugin to make this provider non-exported (readable
+only by the launcher through a temporary per-image grant), but it broke widget
+rendering on some launchers, so it was removed; the provider ships exported.
+Re-landing a launcher-safe version is on the roadmap.
 
 The app's own file-sharing providers, `FileSystemFileProvider` and
 `SharingFileProvider`, are not exported. These are named here so that finding an
@@ -192,7 +197,10 @@ encrypt the database. The app's own AES-256-GCM layer does that.
 **What still leaks.** Row count, rough insertion order, database file
 size, and filesystem timestamps are all visible to anyone with file access, even
 though the contents are not. That is inherent to an on-device encrypted store and
-we don't hide it.
+we don't hide it. One upgrade-specific detail: dose-log ids created before 1.1.0
+encode when the row was written, because the id was previously derived from a
+timestamp. From 1.1.0 the id is a random token with no timestamp; existing rows
+are not re-generated, so those older ids persist until the row is deleted.
 
 ## 5. What is stored where, and the deletion boundary
 
@@ -206,7 +214,9 @@ application, not reproduced here, but its behaviour is described below):
   Keystore key; the high-volume dose logs use the app's own AES-256-GCM layer over
   SQLite described in §4.
 - **Unencrypted:** UI state only (collapse state, theme, unit display, migration
-  flags). Nothing here reveals anything about a user's health.
+  flags). Nothing here reveals your health records; at most a key like an
+  expanded-card flag or a units preference implies a feature is in use, which the
+  app's presence on the device already implies.
 
 **Deletion is scoped, not magic.** "Clear all data" removes every registered
 encrypted key, drops the dose-log table, and deletes the database key. Once that
@@ -248,6 +258,12 @@ defence against someone who can extract stored data.
   share sheet. Once it leaves the app it is yours to look after, and it is outside
   MyHRT's control and not covered by "Clear all data." That is by design, since it
   is your data to take, but we state it plainly rather than imply otherwise.
+- **Export staging.** Creating an export (encrypted or not) briefly writes the
+  unencrypted content to the app's private cache directory before it is zipped,
+  then deletes it right after (and sweeps the directory again at every app launch).
+  The cache is app-private, so no co-installed app can read it on an unrooted
+  device; the residual exposure is forensic, since deleted flash content is not
+  guaranteed unrecoverable until its blocks are reused.
 - **Local backups** ([`src/localBackup.ts`](src/localBackup.ts)) are optional,
   on-device, encrypted with the same device-bound key, written to an app-private
   directory, removed on uninstall, and destroyed by "Clear all data."
@@ -283,9 +299,11 @@ Published on purpose, so the gaps are visible rather than discovered:
   Expo modules, and their native dependencies are part of the trusted base.
 - The INTERNET-absence check is not yet a CI release gate. It is currently a manual
   check on the signed artifact before release; automating it is on the roadmap.
-- The dormant Firebase Cloud Messaging components bundled by `expo-notifications`
-  are blocked at the permission level but not yet stripped from the manifest
-  entirely (see §3).
+- The dormant Firebase Cloud Messaging code bundled by `expo-notifications` has
+  its manifest entry points removed on release builds (see §3), but the compiled
+  classes remain in the app's DEX until the notification library is replaced. With
+  no INTERNET permission and no manifest entry point, that code is inert; removing
+  it from the binary entirely is a dependency change, not a manifest one.
 - AES-GCM does not use AAD, so ciphertext is not cryptographically bound to its row
   id. Low practical impact under the local-only threat model, and a candidate for a
   versioned format change.

@@ -72,7 +72,14 @@ async function getItem(key: string): Promise<string | null> {
       MAX_CONCURRENT_CHUNK_OPS,
       (i) => SecureStore.getItemAsync(`${key}__${i}`)
     );
-    return parts.map((p) => p ?? "").join("");
+    if (parts.some((p) => p == null)) {
+      // A chunk read came back null (partial write, Keystore fault). Joining the
+      // pieces would be silently truncated JSON, which safeJsonParse then turns into
+      // an empty fallback that a save path can persist over real data (feeds M-4).
+      // Fail loudly so the caller can't treat a truncated value as real.
+      throw new Error(`secureStorage: value for "${key}" is missing a chunk (expected ${n}); refusing to return a truncated value`);
+    }
+    return parts.join("");
   }
   return SecureStore.getItemAsync(key);
 }
