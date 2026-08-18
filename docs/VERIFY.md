@@ -63,11 +63,12 @@ will find (see the Firebase note in ARCHITECTURE.md). Exodus measures what its
 signatures match, not everything bundled and not what runs. The traffic capture in
 the next section is the behavioural check.
 
-Two lines in that report can look surprising, and are worth naming. The permission
-list includes `com.android.vending.CHECK_LICENSE`. Google Play injects that during
-distribution; it is not in the app's uploaded bundle (build the APK locally from
-the AAB and it does not appear), it grants no network access, and the app still
-holds no `INTERNET` permission. Exodus may also show the signing certificate as
+Two other items need to be highlighted. The permission list includes
+`android.permission.DYNAMIC_RECEIVER_NOT_EXPORTED`, a self-permission Android's own
+support libraries add as a hardening: it lets the app keep its internal broadcast
+receivers private, so no other app can send them spoofed messages. It is not
+requested by the app's own code, grants no network or data access, and the app
+still holds no `INTERNET` permission. Exodus may also show the signing certificate as
 absent or non-conforming: the app is signed through Google Play App Signing with
 the v2/v3 APK signature scheme, and Exodus's parser reads only the legacy v1 JAR
 signature, so it reports none. The signature is verifiable with `apksigner verify
