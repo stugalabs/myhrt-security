@@ -6,8 +6,8 @@
 // device (Samsung A41) for a cold-start full-table decrypt, ~30 s for a backfill
 // write, and a saturated JS thread, tester-reported 2026-07-06/07.
 //
-// WIRE-COMPATIBLE with the @noble format, this is a hard requirement, existing
-// installs must keep decrypting their data:
+// WIRE-COMPATIBLE with the @noble format. This is a hard requirement, because
+// existing installs must keep decrypting their data:
 //   stored string = base64(nonce[12]) + "." + base64(ciphertext || authTag[16])
 // @noble's gcm(key, nonce).encrypt() returns ciphertext||tag in one buffer;
 // Node-style GCM keeps them separate (getAuthTag/setAuthTag), so we concatenate

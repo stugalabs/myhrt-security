@@ -22,6 +22,9 @@
         "buildType": "app-bundle",
         "autoIncrement": true
       },
+      "ios": {
+        "autoIncrement": true
+      },
       "credentialsSource": "remote",
       "env": {
         "APP_ENV": "production",
