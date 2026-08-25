@@ -8,7 +8,8 @@ marketing line would suggest.
 
 It is written to be defensible rather than reassuring. If a claim here is stronger
 than the code supports, that is a bug in the claim, and we want to hear about it:
-**privacy@myhrt.health**.
+**privacy@myhrt.health**, or the contact form at
+[myhrt.health/contact](https://myhrt.health/contact/) if you'd rather not use email.
 
 ## Read this first: what platform this covers
 
@@ -311,6 +312,9 @@ Published on purpose, so the gaps are visible rather than discovered:
 
 ## Reporting
 
-Security or privacy issues: **privacy@myhrt.health**. Please don't open a public
-issue for an undisclosed vulnerability. A formal disclosure policy is on the
-roadmap above.
+Security or privacy issues, privately, by whichever route suits you: the contact
+form at [myhrt.health/contact](https://myhrt.health/contact/) (no email address
+needed), **privacy@myhrt.health**, or GitHub's private "Report a vulnerability"
+form on this repository. Please don't open a public issue for an undisclosed
+vulnerability. [SECURITY.md](SECURITY.md) has the details; a formal disclosure
+policy is on the roadmap above.

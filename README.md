@@ -176,5 +176,7 @@ other apps.
 
 ## Security
 
-Found an issue? See [SECURITY.md](SECURITY.md); report privately to
-privacy@myhrt.health.
+Found an issue? See [SECURITY.md](SECURITY.md) and report it privately: through
+the contact form at [myhrt.health/contact](https://myhrt.health/contact/) (no
+email address needed), by email to privacy@myhrt.health, or with GitHub's private
+"Report a vulnerability" form on this repository.

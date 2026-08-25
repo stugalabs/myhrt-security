@@ -20,10 +20,13 @@ repository like this are not code, and they are genuinely welcome.
   something that looks wrong, or a place where the published code does not seem to
   match what the app does, please say so. That kind of scrutiny is the point.
 - **Report a security or privacy issue.** Please do this privately, following
-  [SECURITY.md](SECURITY.md) (email privacy@myhrt.health, not a public issue), so
-  it can be fixed before it is disclosed.
-- **Report a bug in the app.** Open an issue here, or email hello@myhrt.health.
-  What you saw, what you expected, and how to reproduce it all help.
+  [SECURITY.md](SECURITY.md): the contact form at
+  [myhrt.health/contact](https://myhrt.health/contact/) (no email needed), email
+  privacy@myhrt.health, or GitHub's private "Report a vulnerability" form on this
+  repo. Never a public issue, so it can be fixed before it is disclosed.
+- **Report a bug in the app.** Use the [contact form](https://myhrt.health/contact/),
+  email hello@myhrt.health, or open an issue here for anything that is not
+  security-related. What you saw, what you expected, and how to reproduce it all help.
 - **Suggest a feature or an improvement.** Same channels. No idea is too small; a
   lot of the app has grown from user suggestions.
 - **Share it.** Tell someone who might find MyHRT useful. Word of mouth is how a
