@@ -93,6 +93,27 @@ module.exports = (config) => {
       }
     }
 
+    // The expo-notifications config plugin (used only to set the neutral
+    // status-bar bell icon and its tint) writes each value twice: once under
+    // the expo.modules.notifications.* key the library actually reads for
+    // local notifications, and once under com.google.firebase.messaging.*,
+    // which only Firebase Cloud Messaging would consult when displaying a push
+    // message. The app never receives push (no Firebase project, FCM's entry
+    // points are removed below), so drop the Firebase pair. Plain deletion is
+    // enough here: these live in the main manifest, not a library manifest.
+    // ORDERING: this only works because this plugin is FIRST in app.json's
+    // plugins array. Expo applies manifest mods in reverse registration order
+    // (last added runs first), so first-in-array means this action runs LAST,
+    // after expo-notifications has written the entries. Verified 2026-09-03:
+    // with this plugin listed last, the filter ran before the entries existed
+    // and they survived into the prebuilt manifest. Keep it first.
+    const mainApp = manifest.application?.[0];
+    if (mainApp && Array.isArray(mainApp['meta-data'])) {
+      mainApp['meta-data'] = mainApp['meta-data'].filter(
+        (m) => !String(m.$?.['android:name'] ?? '').startsWith('com.google.firebase.messaging.default_notification_')
+      );
+    }
+
     // Firebase / ML Kit manifest-surface removal, release builds only.
     if (process.env.MYHRT_BLOCK_INTERNET === '1') {
       // tools:node="remove" markers need the tools namespace on <manifest>.
